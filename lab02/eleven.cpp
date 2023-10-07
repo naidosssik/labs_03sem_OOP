@@ -72,7 +72,6 @@ Eleven::Eleven(Eleven &&other) noexcept
     other._array = nullptr;
 }
 
-
 size_t Eleven::size() const noexcept 
 {
     return _size;

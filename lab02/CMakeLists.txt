@@ -1,14 +1,11 @@
-cmake_minimum_required(VERSION 3.10)
-project(lab_02)
+cmake_minimum_required(VERSION 3.12)
+project(Eleven_Class)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-include_directories(${INCLUDE_DIR})
+find_package(GTest REQUIRED)
+include_directories(${GTEST_INCLUDE_DIRS})
 
-file(GLOB_RECURSE SOURCES LIST_DIRECTORIES false ${SOURCE_DIR}/*.cpp)
-
-add_library(lab_02_lib ${SOURCES})
-add_executable(lab_02_exe main.cpp)
-
-target_link_libraries(lab_02_exe PRIVATE lab_02_lib)
+add_executable(Eleven_Class main.cpp eleven.cpp test.cpp)
+target_link_libraries(MyElevenProject ${GTEST_LIBRARIES})

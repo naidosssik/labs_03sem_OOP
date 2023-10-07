@@ -1,148 +1,232 @@
-#include <eleven.h>
+#include <algorithm>
+#include "eleven.h"
 
-
-Eleven::Eleven()
+bool isEleven(const std::string &number)
 {
-    digits.push_back(0);
-}
-
-Eleven::Eleven(const std::string &hexadecimal)
-{
-    for (char c : hexadecimal)
+    for(char digit : number) 
     {
-        digits.push_back(charToHexDigit(c));
+        if(!isdigit(digit) && !(digit == 'A' || digit == 'a'))
+            return false;
     }
-    normalize();
+    return true;
 }
 
-Eleven::Eleven(unsigned char singleDigit)
-{
-    digits.push_back(singleDigit);
-}
+Eleven::Eleven(): _size(0), _array{nullptr} {}
 
-Eleven Eleven::operator+(const Eleven &other) const
+Eleven::Eleven(const size_t &n, unsigned char t)
 {
-    Eleven result;
-    size_t maxSize = std::max(digits.size(), other.digits.size());
-    unsigned char carry = 0;
-
-    for (size_t i = 0; i < maxSize || carry > 0; ++i)
+    std::cout << "Fill construction" << std::endl;
+    _array = new unsigned char[n];
+    for(size_t i = 0; i < n; ++i) 
     {
-        unsigned char sum = carry;
-        if (i < digits.size())
-            sum += digits[i];
-        if (i < other.digits.size())
-            sum += other.digits[i];
-
-        carry = sum / 11;
-        sum %= 11;
-
-        result.digits.push_back(sum);
+        _array[i] = t;
     }
-
-    return result;
+    _size = n;
 }
 
-Eleven Eleven::operator-(const Eleven &other) const
+// "Initializer list construction"
+Eleven::Eleven(const std::initializer_list<unsigned char> &t)
 {
-    Eleven result;
-    size_t maxSize = std::max(digits.size(), other.digits.size());
-    int carry = 0;
-
-    for (size_t i = 0; i < maxSize; ++i)
+    _array = new unsigned char[t.size()];
+    size_t i = 0;
+    for(auto &c : t) 
     {
-        int diff = carry;
-        if (i < digits.size())
-            diff += digits[i];
-        if (i < other.digits.size())
-            diff -= other.digits[i];
+        if (!isEleven(std::string(1, c))) throw std::logic_error("not Eleven system");
+        _array[i++] = c;
+    }
+    _size = t.size();
+    
+}
 
-        if (diff < 0)
+// "Copy string construction" 
+Eleven::Eleven(const std::string &t)
+{
+    _array = new unsigned char[t.size()];
+    _size = t.size();
+
+    for(size_t i = 0; i < _size; ++i) 
+    {
+        _array[i] = t[i];
+    }
+}
+
+// "Copy construction" 
+Eleven::Eleven(const Eleven &other) 
+{
+    _size = other._size;
+    _array = new unsigned char[_size];
+
+    for(size_t i = 0; i < _size; ++i)
+    {
+        _array[i] = other._array[i];
+    }
+}
+
+// "Move construction"
+Eleven::Eleven(Eleven &&other) noexcept 
+{
+    _size = other._size;
+    _array = other._array;
+    
+    other._size = 0;
+    other._array = nullptr;
+}
+
+
+size_t Eleven::size() const noexcept 
+{
+    return _size;
+}
+
+unsigned char* Eleven::array() const noexcept 
+{
+    return _array;
+}
+
+bool Eleven::operator==(const Eleven &t) const 
+{
+    if (_size != t._size) 
+    {
+        return false;
+    }
+    for (size_t i = 0; i < _size; ++i) 
+    {
+        if (_array[i] != t._array[i])
         {
-            diff += 11;
-            carry = -1;
+            return false;
         }
-        else
+    }
+    return true;
+}
+
+bool Eleven::operator==(const std::string &t) const 
+{
+    if (_size != t.size()) 
+    {
+        return false;
+    }
+    size_t i = _size - 1;
+    for (char c : t)
+    {
+        if (c != _array[i])
         {
-            carry = 0;
+            return false;
         }
-
-        result.digits.push_back(static_cast<unsigned char>(diff));
+        --i;
     }
-
-    result.normalize();
-    return result;
+    return true;
 }
 
-bool Eleven::operator==(const Eleven &other) const
+bool Eleven::operator!=(const Eleven &t) const 
 {
-    return digits == other.digits;
+    return !(*this == t);
 }
 
-bool Eleven::operator!=(const Eleven &other) const
+bool Eleven::operator!=(const std::string &t) const
 {
-    return !(*this == other);
+    return !(*this == t);
 }
 
-std::string Eleven::toHexadecimal() const
+bool Eleven::operator>(const Eleven &t) const 
 {
-    std::string hex;
-    for (unsigned char digit : digits)
+    if (_size != t.size())
     {
-        hex += hexDigitToChar(digit);
+        return _size > t.size();
     }
-    return hex;
-}
-
-void Eleven::normalize()
-{
-    while (digits.size() > 1 && digits.back() == 0)
+    for (size_t i = _size - 1; i >= 0; ++i)
     {
-        digits.pop_back();
+        if (_array[i] < t.array()[i])
+        {
+            return false;
+        }
+        return true;
     }
 }
 
-unsigned char Eleven::charToHexDigit(char c) const
+bool Eleven::operator>=(const Eleven &t) const 
 {
-    if (c >= '0' && c <= '9')
-        return static_cast<unsigned char>(c - '0');
-    else if (c >= 'A' && c <= 'A' + 10)
-        return static_cast<unsigned char>(c - 'A' + 10);
-    else if (c >= 'a' && c <= 'a' + 10)
-        return static_cast<unsigned char>(c - 'a' + 10);
-    else
-        throw std::invalid_argument("Invalid hexadecimal character");
+    return (*this > t) || (*this == t);
 }
 
-char Eleven::hexDigitToChar(unsigned char digit) const
+bool Eleven::operator<(const Eleven &t) const 
 {
-    if (digit >= 0 && digit <= 9)
-        return static_cast<char>(digit + '0');
-    else if (digit >= 10 && digit <= 20)
-        return static_cast<char>(digit + 'A' - 10);
-    else
-        throw std::invalid_argument("Invalid hexadecimal digit");
+    return !(*this >= t);
 }
 
-int main()
+bool Eleven::operator<=(const Eleven &t) const 
 {
-    Eleven num1("A12");
-    Eleven num2("3B");
+    return !(*this > t);
+}
 
-    Eleven sum = num1 + num2;
-    Eleven diff = num1 - num2;
+void del_nul(std::string &s) 
+{
+    int count_zero = 0;
+    size_t i = 0;
+    while(s[i] == '0') {
+        ++count_zero;
+        ++i;
+    }
+    s.erase(0, count_zero);
+    std::reverse(s.begin(), s.end());
+}
 
-    std::cout << "num1 + num2 = " << sum.toHexadecimal() << std::endl;
-    std::cout << "num1 - num2 = " << diff.toHexadecimal() << std::endl;
-
-    if (num1 == num2)
+Eleven Eleven::operator+(const Eleven &t) const
+{
+    size_t len = std::max(_size, t._size) + 1;
+    std::string summ(len, '0');
+    for (size_t i = 0; i < len - 1; ++i)
     {
-        std::cout << "num1 is equal to num2" << std::endl;
+        int summa = (((i < _size) ? _array[i] - '0' : 0) + ((i < t._size) ? t._array[i] - '0' : 0));
+        summ[i + 1] = (summa / 11) + '0';
+        summ[i] = (summ[i] - '0' + summa) % 11 + '0';
     }
-    else
-    {
-        std::cout << "num1 is not equal to num2" << std::endl;
-    }
+    std::reverse(summ.begin(), summ.end());
+    del_nul(summ);
+    return Eleven(summ);
+}
 
-    return 0;
+Eleven Eleven::operator-(const Eleven &t) const
+{
+    if (*this < t)
+    {
+        throw std::logic_error("Can't be negative");
+    }
+    if (*this == t)
+    {
+        return Eleven("0");
+    }
+    size_t len = std::max(_size, t._size);
+    std::string raz(len, '0');
+    for (size_t i = 0; i < len - 1; i++)
+    {
+        raz[i] += _array[i] - '0' - ((i < t._size) ? t._array[i] - '0' : 0);
+        if (raz[i] - '0' < 0)
+        {
+            raz[i] += 11;
+            raz[i + 1] -= 1;
+        }
+    }
+    raz[len - 1] += _array[len - 1] - '0' - ((len == t._size) ? t._array[len - 1] - '0' : 0);
+    std::reverse(raz.begin(), raz.end());
+    del_nul(raz);
+    return Eleven(raz);
+}
+
+std::ostream &Eleven::print(std::ostream &os)
+{
+    for(size_t i = 0; i < _size; ++i)
+    {
+        os << _array[i];
+    }
+    return os;
+}
+
+Eleven::~Eleven() noexcept
+{
+    if(_size > 0)
+    {
+        _size = 0;
+        delete [] _array;
+        _array = nullptr;
+    }
 }

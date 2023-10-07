@@ -7,5 +7,5 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIRS})
 
-add_executable(Eleven_Class main.cpp eleven.cpp test.cpp)
+add_executable(Eleven_Class main.cpp eleven.cpp tests.cpp)
 target_link_libraries(MyElevenProject ${GTEST_LIBRARIES})

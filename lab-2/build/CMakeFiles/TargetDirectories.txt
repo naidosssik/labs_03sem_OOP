@@ -1,4 +1,0 @@
-/Users/n/Projects/labs_03sem_OOP/lab-2/build/CMakeFiles/task.dir
-/Users/n/Projects/labs_03sem_OOP/lab-2/build/CMakeFiles/tests.dir
-/Users/n/Projects/labs_03sem_OOP/lab-2/build/CMakeFiles/edit_cache.dir
-/Users/n/Projects/labs_03sem_OOP/lab-2/build/CMakeFiles/rebuild_cache.dir
